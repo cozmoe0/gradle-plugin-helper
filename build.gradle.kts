@@ -16,19 +16,28 @@ dependencies {
     implementation(gradleApi())
 }
 
-tasks {
-    create("sourcesJar", Jar::class) {
-        group = "build"
-        archiveClassifier.set("sources")
-        from(sourceSets["main"].allSource)
-    }
+val sourcesJar by tasks.registering(Jar::class) {
+    group = "build"
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
 }
 
-val artifactTasks = arrayOf(
-    tasks["sourcesJar"]
-)
-
 artifacts {
-    artifactTasks.forEach(::archives)
+    add("implementation", sourcesJar)
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            groupId = "dev.cozmoe.gradle"
+            artifactId = "gradle-plugin-helper"
+            version = version.toString()
+        }
+    }
 }
 
